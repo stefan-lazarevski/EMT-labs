@@ -1,8 +1,9 @@
 package mk.ukim.finki.labb.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
-
+@Data
 @Entity
 public class Host {
 
@@ -25,27 +26,4 @@ public class Host {
         this.country = country;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public Country getCountry() {
-        return country;
-    }
-
-    public void setCountry(Country country) {
-        this.country = country;
-    }
 }

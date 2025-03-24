@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface HousingService {
 
-    List<Housing> findall();
+    List<Housing> findAll();
 
     Optional<Housing> findById(Long id);
 
@@ -16,4 +16,6 @@ public interface HousingService {
     Optional<Housing> save(HousingDto housing);
 
     void deleteById(Long id);
+
+    Optional<Housing> rentHouse(Long houseId);
 }

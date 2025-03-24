@@ -1,5 +1,6 @@
 package mk.ukim.finki.labb.service.impl;
 
+import mk.ukim.finki.labb.model.Host;
 import mk.ukim.finki.labb.model.Housing;
 import mk.ukim.finki.labb.model.dto.HousingDto;
 import mk.ukim.finki.labb.model.enumerations.Category;
@@ -27,7 +28,7 @@ public class HousingServiceImpl implements HousingService {
     }
 
     @Override
-    public List<Housing> findall() {
+    public List<Housing> findAll() {
         return this.housingRepository.findAll();
     }
 
@@ -37,68 +38,45 @@ public class HousingServiceImpl implements HousingService {
     }
 
     @Override
-    public Optional<Housing> update(Long id, HousingDto housing) {
-        return housingRepository.findById(id)
-                .map(existingHousing -> {
-                    if(housing.getName() != null) {
-                        existingHousing.setName(housing.getName());
-                    }
-                    if (housing.getHost() != null && hostRepository.findById(housing.getHost()).isPresent()) {
-                        existingHousing.setHost(hostRepository.findById(housing.getHost()).get());
-                    }
+    public Optional<Housing> update(Long id, HousingDto housingDto) {
+        return housingRepository.findById(id).map(existingHouse -> {
+            if (housingDto.getName() != null) {
+                existingHouse.setName(housingDto.getName());
+            }
+            if (housingDto.getCategory() != null) {
+                existingHouse.setCategory(housingDto.getCategory());
+            }
+            if (housingDto.getHostId() != null && hostRepository.findById(housingDto.getHostId()).isPresent()) {
+                existingHouse.setHost(hostRepository.findById(housingDto.getHostId()).get());
+            }
+            if (housingDto.getNumRooms() != null) {
+                existingHouse.setNumRooms(housingDto.getNumRooms());
+            }
 
-//                    if(housing.getHost() != null) {
-//                        existingHousing.setHost(housing.getHost());
-//                    }
-
-                    if (housing.getCategory() != null) {
-                        try {
-                            // If your enum has a method to get by name
-                            Category categoryEnum = Category.valueOf(housing.getCategory());
-                            existingHousing.setCategory(categoryEnum);
-                        } catch (IllegalArgumentException e) {
-                            // Handle invalid enum name
-                        }
-                    }
-
-//                    if(housing.getCategory() != null) {
-//                        existingHousing.setCategory(housing.getCategory());
-//                    }
-                    if(housing.getNumRooms() != null) {
-                        existingHousing.setNumRooms(housing.getNumRooms());
-                    }
-                    return housingRepository.save(existingHousing);
-                });
+            return housingRepository.save(existingHouse);
+        });
     }
 
     @Override
     public Optional<Housing> save(HousingDto housing) {
-        Housing housing1 = new Housing();
-        housing1.setName(housing.getName());
-//        housing1.setHost(housing.getHost());
-
-        if (housing.getHost() != null) {
-            hostRepository.findById(housing.getHost())
-                    .ifPresent(housing1::setHost);
-        }
-
-        // For category: Convert String to Category enum
-        if (housing.getCategory() != null) {
-            try {
-                // Directly convert string to enum value
-                Category categoryEnum = Category.valueOf(housing.getCategory());
-                housing1.setCategory(categoryEnum);
-            } catch (IllegalArgumentException e) {
-                // Handle case where string doesn't match any enum value
-                // You might want to log this or use a default category
-            }
-        }
-
-//        housing1.setCategory(housing.getCategory());
-        housing1.setNumRooms(housing.getNumRooms());
-
-        return Optional.of(housingRepository.save(housing1));
+        Optional<Host> host = hostRepository.findById(housing.getHostId());
+        return host.map(houseHost -> housingRepository.save
+                (new Housing(housing.getName(), housing.getCategory(),hostRepository.findById(housing.getHostId()).get(), housing.getNumRooms())));
     }
+
+    @Override
+    public Optional<Housing> rentHouse(Long houseId) {
+        return housingRepository.findById(houseId).map(house -> {
+            if (house.getNumRooms() > 0) {
+                house.setNumRooms(house.getNumRooms() - 1);
+                housingRepository.save(house);
+                return house;
+            } else {
+                throw new IllegalStateException("No available houses left.");
+            }
+        });
+    }
+
 
     @Override
     public void deleteById(Long id) {

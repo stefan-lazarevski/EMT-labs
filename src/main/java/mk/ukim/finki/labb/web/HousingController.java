@@ -21,7 +21,7 @@ public class HousingController {
 
     @GetMapping
     public List<Housing> findall(){
-        return this.housingService.findall();
+        return this.housingService.findAll();
     }
 
     @GetMapping("/{id}")
@@ -36,17 +36,34 @@ public class HousingController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/edit/{id}")
-    public ResponseEntity<Housing> update(@PathVariable Long id,@RequestBody HousingDto housing) {
-        return housingService.update(id, housing)
+//    @PatchMapping("/{houseId}/rent")
+//    public ResponseEntity<Housing> rent(@PathVariable Long houseId) {
+//        return housingService.rentHouse(houseId).map(ResponseEntity::ok).orElse(ResponseEntity.badRequest().build());
+//    }
+
+
+    @PatchMapping("/{id}/rent")
+    public ResponseEntity<?> rent(@PathVariable Long id) {
+        try {
+            Housing bookedHousing = housingService.rentHouse(id).orElseThrow();
+            return ResponseEntity.ok(bookedHousing);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @PatchMapping("/update/{houseId}")
+    public ResponseEntity<Housing> update(@PathVariable Long houseId,@RequestBody HousingDto housing) {
+        return housingService.update(houseId, housing)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (housingService.findById(id).isPresent()) {
-            housingService.deleteById(id);
+    @DeleteMapping("/delete/{houseId}")
+    public ResponseEntity<Void> delete(@PathVariable Long houseId) {
+        if (housingService.findById(houseId).isPresent()) {
+            housingService.deleteById(houseId);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
