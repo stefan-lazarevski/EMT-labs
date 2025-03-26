@@ -1,10 +1,13 @@
 package mk.ukim.finki.labb.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 
 import lombok.Data;
 import mk.ukim.finki.labb.model.enumerations.Category;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -19,6 +22,10 @@ public class Housing {
     @ManyToOne
     private Host host;
     private Integer numRooms;
+
+    @OneToMany(mappedBy = "housing", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<Review> reviews;
 
 
     public Housing(){
